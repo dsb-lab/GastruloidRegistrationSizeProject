@@ -17,6 +17,7 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('-f','--force',action='store_true',help="Remove any setup folder if it already exists and setup the analysis folder.")
 parser.add_argument('-o','--output',action='store',help="Folder to use for saving the data.")
+parser.add_argument('-s','--skip',action='store_true',help="Skip preprocessing.")
 parser.add_argument('directory',help="Folder to store the data")
 
 args = parser.parse_args()
@@ -26,7 +27,7 @@ directory = args.directory
 directory_output = f"{directory}_output"
 
 # Base arguments
-def create_parameters_json(directory,directory_output):
+def create_parameters_json(directory,directory_output,skip):
 
     files = os.listdir(directory)
 
@@ -34,13 +35,14 @@ def create_parameters_json(directory,directory_output):
     reader.SetFileName(f"{directory}/{files[0]}")
     reader.ReadImageInformation()
 
-    return {
+    json_file = {
 
         "image_info" : {
             "voxel_size": reader.GetSpacing(),
             "first": 1,
             "last": len(files),
-            "not_to_do": []
+            "not_to_do": [],
+            "low_th": 0,
         },
         "preprocessing" : {
             "path_to_data": f"{directory}",
@@ -91,8 +93,16 @@ def create_parameters_json(directory,directory_output):
             "recompute": 1,
 
             "apply_trsf": 1,
+            "keep_vectorfield": 1
         }
     }
+
+    if skip:
+        json_file["rigid"]["path_to_data"] = json_file["preprocessing"]["path_to_data"]
+        json_file["rigid"]["file_name"] = json_file["preprocessing"]["file_name"]
+        del json_file["preprocessing"]
+
+    return json_file
 
 def create_summary_csv(directory,directory_output):
 
@@ -119,7 +129,7 @@ def create_summary_csv(directory,directory_output):
     return data
 
 # Functions
-def setup_(directory,directory_output):
+def setup_(directory,directory_output,skip):
 
     print(f"Making new analysis folder in {directory_output}.")
 
@@ -128,11 +138,11 @@ def setup_(directory,directory_output):
     data = create_summary_csv(directory,directory_output)
     data.to_csv(f"{directory_output}/files.csv")
 
-    json_object = json.dumps(create_parameters_json(directory,directory_output), indent=4)
+    json_object = json.dumps(create_parameters_json(directory,directory_output,skip), indent=4)
     with open(f"{directory_output}/parameters.json", "w") as outfile:
         outfile.write(json_object)
 
-def setup(directory,directory_output,force=False):
+def setup(directory,directory_output,skip,force=False):
     """
     Make folder structure for the analysis from analysis.
     """
@@ -140,17 +150,17 @@ def setup(directory,directory_output,force=False):
         if force: #If force, remove old and make new folrder
             print(f"Old analysis folder {directory_output} has been removed.")
             shutil.rmtree(directory_output)
-            setup_(directory,directory_output)
+            setup_(directory,directory_output,skip)
         else: #If not force, raise exception
             raise Exception(f"Output folder '{directory_output}' for project '{directory}' exists, if you want to overwrite it, please, add the flag -f to foor overwritting.")
     else: #if it does not exist, make folder
-        setup_(directory,directory_output)
+        setup_(directory,directory_output,skip)
 
 # Script
 if args.output:
     directory_output = args.output
 
 if args.force:
-    setup(directory,directory_output,force=True)
+    setup(directory,directory_output,args.skip,force=True)
 else:
-    setup(directory,directory_output,force=False)
+    setup(directory,directory_output,args.skip,force=False)

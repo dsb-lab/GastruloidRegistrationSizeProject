@@ -46,6 +46,7 @@ The flags that can be added to the script are:
 
  - `-o` or `--output`: Name of the folder to create in which all the analysis results will be added. If not output is provided, a folder named `DIRECTORY_output` will be created.
  - `-f` or `--force`: If the folder exists, this will force to erase it and create anew folder from scratch.
+ - `-s` or `--skip`: In case you do not want to perform any preprocessing at all to the images.
 
 After running this script, a folder with the following structure will be generated:
 
