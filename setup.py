@@ -147,7 +147,7 @@ def setup(directory,directory_output,skip,force=False):
     Make folder structure for the analysis from analysis.
     """
     if os.path.isdir(directory_output): #Check if folder exist
-        if force: #If force, remove old and make new folrder
+        if force: #If force, remove old and make new folder
             print(f"Old analysis folder {directory_output} has been removed.")
             shutil.rmtree(directory_output)
             setup_(directory,directory_output,skip)

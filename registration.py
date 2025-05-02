@@ -43,7 +43,7 @@ json_object = json.dumps(parameters, indent=4)
 
 with open(file_name, "w") as outfile:
     outfile.write(json_object)
-
+print(json_object)
 # Functions
 def registration(file):
     

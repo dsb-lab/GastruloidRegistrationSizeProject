@@ -37,10 +37,10 @@ def preprocessing(image,file,parameters):
     #Copy image
     image_preprocessed = sitk.Image(image)
     #Preprocessing has to be performed over the sitk object
-        #Threshold
+    #Threshold
     image_preprocessed[image<parameters["threshold"]] = 0
 
-        #Threshold Plot
+    #Threshold Plot
     if args.analysis: #Only plot during analysis
         pixels = sitk.GetArrayFromImage(image).flatten()
         max_ = np.percentile(pixels,parameters["saturation_percentile"])
